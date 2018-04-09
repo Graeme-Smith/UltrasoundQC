@@ -189,6 +189,8 @@ py.plot(fig, filename='reverb-3d-surface.html')
 
 lm, lc, rm, rc = detect_sides(cnt, cornersOfArc(cnt))
 
+scan_angle = reverb_angle(lm, rm)
+
 # export BROWSER=google-chrome
 
 # Defining functions that will intersect

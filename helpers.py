@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import scipy
 import cv2
+import math
 
 ''' Geometric Functions which identifies the top, bottom and sides of a curvilinear reverb pattern.'''
 
@@ -29,7 +30,7 @@ def detect_sides(contour, corners):
 # Detects the corners of a ultrasound scan image:
 def cornersOfArc(coordinates):
 
-    # Calculate moments and centre points of contour:
+    # Calculate moments and centre point of contour:
     M = cv2.moments(coordinates)
     cX = int(M["m10"] / M["m00"])
     cY = int(M["m01"] / M["m00"])
@@ -45,7 +46,6 @@ def cornersOfArc(coordinates):
     top_right = tuple(right[right[:, 1].argmin()])
     return bottom_left, bottom_right, top_left, top_right
 
-
 ''' Geometric Functions which identify characteristics of the curvilinear reverb pattern,
  for example focal point & angle of sides'''
 
@@ -53,6 +53,13 @@ def cornersOfArc(coordinates):
 
 def findIntersection(func1, func2, x0):
     return scipy.optimize.fsolve(lambda x : func1(x) - func2(x), x0)
+
+# Returns between the two sides of a reverb image:
+def reverb_angle(lm, rm):
+    l_deg = math.degrees(math.atan2(lm, 1))
+    r_deg = math.degrees(math.atan2(rm, 1))
+    deg = 180-(round(abs(l_deg),0) + round(abs(r_deg),0))
+    return deg
 
 '''Plotting Functions to visualise data'''
 
@@ -62,4 +69,12 @@ def pixelIntensities(imageArray):
     horizontal_intensity = np.mean(imageArray, axis=0)  # Average by column
     vertical_intensity = np.mean(imageArray, axis=1)  # Average by row
     return horizontal_intensity, vertical_intensity
+
+# Convert a greyscale image into a 3d surface
+def plot3d(greyscale_image, log_transform=False):
+    if log_transform:
+        #Plot data
+    else:
+        #Log transform data before plotting
+    return
 
