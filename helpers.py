@@ -61,6 +61,40 @@ def reverb_angle(lm, rm):
     deg = 180-(round(abs(l_deg),0) + round(abs(r_deg),0))
     return deg
 
+def fit_curve(contour):
+    # Fit polynomial curve to data points:
+    coefs = np.polynomial.polynomial.polyfit(x=contour[:,0,0], y=contour[:,0,1], deg=2)
+    ffit = np.polynomial.polynomial.polyval(contour[:, 0, 0], coefs)
+    return coefs, ffit
+
+# plt.plot(cnt[:,0,0], ffit)
+# plt.plot(cnt[:,0,0], cnt[:,0,1])
+
+
+def isolate_curve(contour, corners = [], top=True):
+    # Returns the coordinates relating to the top curve:
+    bottom_left, bottom_right, top_left, top_right = corners
+    if top:
+        # Isolate coordinates for top curve from cnt
+        temp = contour[np.where(contour[:, :, 0] >= top_left[0])]
+        temp = temp[np.where(temp[:, 0] <= top_right[0])]
+        temp = temp[np.where(temp[:, 1] <= bottom_left[1])]
+        curve = temp[np.where(temp[:, 1] <= bottom_right[1])]
+    # Returns the coordinates relating to the bottom curve:
+    else:
+        temp = contour[np.where(contour[:, :, 0] >= bottom_left[0])]
+        temp = temp[np.where(temp[:, 0] <= bottom_right[0])]
+        temp = temp[np.where(temp[:, 1] >= bottom_left[1])]
+        curve = temp[np.where(temp[:, 1] >= bottom_right[1])]
+    return curve
+
+#plt.gca().invert_yaxis()
+#x = isolate_curve(cnt, False)
+#plt.plot(x[:,0],x[:,1])
+#x = isolate_curve(cnt)
+#plt.plot(x[:,0],x[:,1])
+
+
 '''Plotting Functions to visualise data'''
 
 # For a greyscale image/numpy array returns the average pixel intensity across each column and row.
@@ -74,7 +108,9 @@ def pixelIntensities(imageArray):
 def plot3d(greyscale_image, log_transform=False):
     if log_transform:
         #Plot data
+        print "todo"
     else:
         #Log transform data before plotting
+        print "todo"
     return
 

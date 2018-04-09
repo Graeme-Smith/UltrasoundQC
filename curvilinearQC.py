@@ -26,16 +26,11 @@ def detectData(cnt, convex):
     cX = int(M["m10"] / M["m00"])
     cY = int(M["m01"] / M["m00"])
 
-
     # The top curve is defined the best in cnts while the bottom curve is defined best
     # in convex
-
+    bottom_left, bottom_right, top_left, top_right = corners = cornersOfArc(convex)
     # Isolate coordinates for top curve from cnt
-    temp = cnt[np.where(cnt[:, :, 0] >= top_left[0])]
-    temp = temp[np.where(temp[:, 0] <= top_right[0])]
-    temp = temp[np.where(temp[:, 1] <= bottom_left[1])]
-    topCurve = temp[np.where(temp[:, 1] <= bottom_right[1])]
-
+    topCurve = isolate_curve(cnt, corners, top=True)
 
     # Calculate position to insert top curve into convex:
     left_x, left_y = np.where(convex[:, 0] == top_left)
@@ -87,7 +82,8 @@ cnt = selectContour(cnts)
 convex = cv2.convexHull(cnt)
 
 # Find the four corners of an ultrasound arc:
-bottom_left, bottom_right, top_left, top_right = cornersOfArc(convex)
+corners = cornersOfArc(convex)
+#bottom_left, bottom_right, top_left, top_right = cornersOfArc(convex)
 
 # Detect the ultrasound scan from image:
 ultrasound_cnt, cnt, convex = detectData(cnt, convex)
