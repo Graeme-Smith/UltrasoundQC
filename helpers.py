@@ -1,12 +1,34 @@
-import numpy as np
+import cv2
+import datetime
+import math
 from matplotlib import pyplot as plt
+import numpy as np
+import os
 import scipy
 from scipy import optimize
-import cv2
-import math
 
 
-''' Geometric Functions which identifies the top, bottom and sides of a curvilinear reverb pattern.'''
+def create_output_directory(directory):
+    """Create directory to contain results"""
+    # Add date stamp to file name
+    today = datetime.date.today()
+    today = today.strftime('%d%b%Y')
+    directory_name = "Ultrasound_QC_"
+    directory = os.path.join(directory, directory_name + today)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    return directory
+
+
+def import_batch_images(relevant_path):
+    """Create list of all images in user supplied directory"""
+    included_extensions = ['jpg', 'png', 'dcm']
+    file_names = [fn for fn in os.listdir(relevant_path)
+                  if any(fn.endswith(ext) for ext in included_extensions)]
+    return file_names
+
+
+""" Geometric Functions which identifies the top, bottom and sides of a curvilinear reverb pattern."""
 
 
 def select_contour(contours):
@@ -29,7 +51,7 @@ def clean_data(contour, convexed_contour):
     # in convex
     bottom_left, bottom_right, top_left, top_right = corners = corners_of_arc(convexed_contour)
     # Isolate coordinates for top curve from cnt
-    topCurve = isolate_curve(contour, corners, top=True)
+    top_curve = isolate_curve(contour, corners, top=True)
 
     # Calculate position to insert top curve into convex:
     left_x, left_y = np.where(convexed_contour[:, 0] == top_left)
@@ -38,9 +60,9 @@ def clean_data(contour, convexed_contour):
     # Delete top straight line from convex coordinates: TODO
     temp = convexed_contour.copy()
     # Insert top curve where straight line was in convex coordinates: TODO Remove hardwired indexes
-    temp = np.concatenate((temp[:left_x[2], 0], (topCurve[::-1])[:-1], temp[left_x[2]:, 0], temp[0]), axis=0)
+    temp = np.concatenate((temp[:left_x[2], 0], (top_curve[::-1])[:-1], temp[left_x[2]:, 0], temp[0]), axis=0)
     temp = np.concatenate((temp, temp[:0]), axis=0)
-    temp = np.delete(temp, (len(topCurve) + left_x[0]), axis=0)
+    temp = np.delete(temp, (len(top_curve) + left_x[0]), axis=0)
     ultrasound_contour = temp
 
     return ultrasound_contour, contour, convexed_contour
@@ -87,8 +109,8 @@ def corners_of_arc(coordinates):
     return bottom_left, bottom_right, top_left, top_right
 
 
-''' Geometric Functions which identify characteristics of the curvilinear reverb pattern,
- for example focal point & angle of sides'''
+""" Geometric Functions which identify characteristics of the curvilinear reverb pattern,
+ for example focal point & angle of sides"""
 
 
 def find_intersection(func1, func2, x0):
@@ -115,7 +137,7 @@ def fit_curve(contour):
 # plt.plot(cnt[:,0,0], cnt[:,0,1])
 
 
-def isolate_curve(contour, corners = [], top=True):
+def isolate_curve(contour, corners=[], top=True):
     # Returns the coordinates relating to the top curve:
     bottom_left, bottom_right, top_left, top_right = corners
     if top:
@@ -140,7 +162,7 @@ plt.gca().invert_yaxis()
 # plt.plot(x[:,0],x[:,1])
 
 
-'''Plotting Functions to visualise data'''
+"""Plotting Functions to visualise data"""
 
 
 def pixel_intensities(image_array):
