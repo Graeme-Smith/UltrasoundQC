@@ -1,3 +1,5 @@
+from __future__ import print_function
+import argparse
 import pydicom as dicom
 import os
 import imutils
@@ -8,12 +10,42 @@ import plotly.graph_objs as go
 from helpers import *
 
 
-# TODO add argparse commands
+""" 
+Import Arguments from command line
+"""
+parser = argparse.ArgumentParser(
+    description='Extract QC data from images produced by curvilinear ultrasound probes reverbing in air')
+parser.add_argument('-file', '-f',
+                    nargs='+',
+                    help='Import single or multiple ultrasound images',
+                    required=False)
+parser.add_argument('-input_dir', '-i',
+                    type=str,
+                    help='File path to directory containing input images',
+                    required=False)
+parser.add_argument('-output_dir', '-o',
+                    type=str,
+                    help='File path to output results',
+                    required=False)
+args = parser.parse_args()
 
+# User specified imaging files - List of strings as multiple image files may be provided.
+# image_files = args.file
+print(args.input_dir)
+image_files = import_batch_images(args.input_dir)
+print(image_files)
+# User specified output directory for results/logs to be saved to. Directory will be created if it does not exist.
+output_path = args.output_dir
+
+# Create output directory in user specified directory for saving results:
+output_directory = create_output_directory(output_path)
 
 '''Import chosen image specified on the  command line or run on batch of images from a folder'''
 
-img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105417156.jpg')
+
+img = cv2.imread(image_files[1])
+
+# img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105417156.jpg')
 # img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105300406.jpg')
 # img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105459890.jpg')
 # img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105527234.jpg')

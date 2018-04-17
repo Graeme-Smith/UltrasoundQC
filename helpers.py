@@ -22,10 +22,12 @@ def create_output_directory(directory):
 
 def import_batch_images(relevant_path):
     """Create list of all images in user supplied directory"""
-    included_extensions = ['jpg', 'png', 'dcm']
+    # included_extensions = ['jpg', 'png', 'dcm']
+    included_extensions = ['jpg', 'png']
     file_names = [fn for fn in os.listdir(relevant_path)
                   if any(fn.endswith(ext) for ext in included_extensions)]
-    return file_names
+    file_paths = map(os.path.join, ([relevant_path] * len(file_names)), file_names)
+    return file_paths
 
 
 """ Geometric Functions which identifies the top, bottom and sides of a curvilinear reverb pattern."""
@@ -175,9 +177,10 @@ def pixel_intensities(image_array):
 def plot3d(greyscale_image, log_transform=False):
     """Convert a greyscale image into a 3d surface"""
     if log_transform:
-        #Plot data
+        # Plot data
+        print(greyscale_image)
         print "todo"
     else:
-        #Log transform data before plotting
+        # Log transform data before plotting
         print "todo"
     pass
