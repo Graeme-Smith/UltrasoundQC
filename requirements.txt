@@ -2,6 +2,7 @@ backports.functools-lru-cache==1.5
 certifi==2018.1.18
 chardet==3.0.4
 cycler==0.10.0
+dash==0.21.0
 decorator==4.2.1
 enum34==1.1.6
 functools32==3.2.3.post2
