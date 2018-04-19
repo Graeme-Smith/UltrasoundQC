@@ -8,6 +8,20 @@ import scipy
 from scipy import optimize
 
 
+def import_image(file_name):
+    """Import chosen image specified on the  command line or run on batch of images from a folder"""
+    img = cv2.imread(file_name)
+
+    # If image captured from mobile phone perform perspective correction
+    # TODO: Add code to perform perspective correction
+
+    # Convert imported image to grey scale, apply blur, and threshold in preparation for feature detection
+    grey_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blurred_image = cv2.GaussianBlur(grey_image, (15, 15), 0)
+    threshold_image = cv2.threshold(blurred_image, 25, 255, cv2.THRESH_BINARY)[1]
+
+    return img, grey_image, blurred_image, threshold_image
+
 def create_output_directory(directory):
     """Create directory to contain results"""
     # Add date stamp to file name
@@ -30,15 +44,27 @@ def import_batch_images(relevant_path):
     return file_paths
 
 
+def save_template(verified_contour):
+    """Save contour to use as basis for verifying future. Used in method development"""
+    np.save('contour_template', verified_contour)
+
+
 """ Geometric Functions which identifies the top, bottom and sides of a curvilinear reverb pattern."""
 
 
 def select_contour(contours):
     """Select the contour relating to the ultasound image."""
     if len(contours) != 0:
-        # Select contour with biggest area TODO add match check
-        # cnt = max(cnts, key = cv2.contourArea)
-        reverb_contour = sorted(contours, key=cv2.contourArea, reverse=True)[0]
+        # Order contours by largest area:
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[0:6]  # Return 5 largest features
+        # Read in template contour to use as comparison:
+        template_contour = np.load("contour_template" + '.npy')
+        hu_invariant = []
+        for i in range(0, len(contours), 1):
+            # Return feature which most matches template
+            hu_invariant.append(cv2.matchShapes(contours[i], template_contour, 1, 0.0))
+        reverb_contour = contours[hu_invariant.index(min(hu_invariant))]
+        # reverb_contour = contours[0]
         return reverb_contour
 
 
@@ -124,7 +150,7 @@ def reverb_angle(lm, rm):
     """Returns between the two sides of a reverb image"""
     l_deg = math.degrees(math.atan2(lm, 1))
     r_deg = math.degrees(math.atan2(rm, 1))
-    deg = 180-(round(abs(l_deg), 0) + round(abs(r_deg), 0))
+    deg = 180 - (round(abs(l_deg), 0) + round(abs(r_deg), 0))
     return deg
 
 
