@@ -1,14 +1,17 @@
 from __future__ import print_function
 import argparse
-import pydicom as dicom
-import os
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
 import imutils
-from scipy.misc import toimage
+import os
+# import pandas as pd
 import plotly.offline as py
 import plotly.graph_objs as go
-# import pandas as pd
+import pydicom as dicom
+from scipy.misc import toimage
+import sys
 from helpers import *
-
 
 """ 
 Import Arguments from command line
@@ -29,11 +32,18 @@ parser.add_argument('-output_dir', '-o',
                     required=False)
 args = parser.parse_args()
 
-# User specified imaging files - List of strings as multiple image files may be provided.
-# image_files = args.file
-print(args.input_dir)
-image_files = import_batch_images(args.input_dir)
-print(image_files)
+# Import images for processing:
+if args.file is not None:
+    # If individual files have been specified import them from the commandline
+    image_files = args.file
+elif args.output_dir is not None:
+    # If an input directory is specified import all jpgs, png, and dcm files:
+    image_files = import_batch_images(args.input_dir)
+else:
+    sys.exit("No input files specified.  Use the flags -f to specify individual files, or -o to import all images in a"
+          "a specified folder")
+
+
 # User specified output directory for results/logs to be saved to. Directory will be created if it does not exist.
 output_path = args.output_dir
 
@@ -41,48 +51,10 @@ output_path = args.output_dir
 output_directory = create_output_directory(output_path)
 
 '''Import chosen image specified on the  command line or run on batch of images from a folder'''
-
-
-img = cv2.imread(image_files[1])
-
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105417156.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105300406.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105459890.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105527234.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/20180220105659468.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/IMG_20180219_1_83.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/IMG_20131212_1_32.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/IMG_20131212_1_20.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/IMG_20131212_1_17.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/IMG_20131212_1_16.jpg')
-# img = cv2.imread('/home/graeme/Desktop/reverb_images/IMG_20131212_1_1.jpg')
-
-'''If image captured from mobile phone perform perspective correction'''
-
-'''Convert imported image to grey scale, apply blur, and threshold in preparation for feature detection'''
-
-grey_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-blurred_image = cv2.GaussianBlur(grey_image, (15, 15), 0)
-threshold_image = cv2.threshold(blurred_image, 25, 255, cv2.THRESH_BINARY)[1]
-
-'''Feature detection in image'''
-# find contours in the thresholded image
-cnts = cv2.findContours(threshold_image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cnts = cnts[0] if imutils.is_cv2() else cnts[1]
-
-'''From the features returned from the image select the reverb pattern'''
-cnt = select_contour(cnts)
-
-# Calculate convex of selected contour:
-convex = cv2.convexHull(cnt)
-
-# Find the four corners of an ultrasound arc:
-corners = corners_of_arc(convex)
-# bottom_left, bottom_right, top_left, top_right = cornersOfArc(convex)
-
-# Detect the ultrasound scan from image:
-ultrasound_cnt, cnt, convex = clean_data(cnt, convex)
-# cv2.drawContours(img, [ultrasound_cnt], -1, (0, 0, 255), 2)
+# TODO Add batch processing support
+img, grey_image, blurred_image, threshold_image = import_image(image_files[1])
+'''Detect reverb feature in image'''
+ultrasound_cnt, cnt, convex, corners = detect_reverb(threshold_image)
 
 # Create the basic black image
 mask = np.zeros(img.shape, np.uint8)
@@ -91,6 +63,7 @@ cv2.drawContours(mask, [cnt], 0, (255, 255, 255), -1)
 
 # Apply the mask and display the result
 maskedImg = cv2.bitwise_and(img, mask)
+# TODO Check that equalizeHist is appropriate here:
 equalised_img = cv2.equalizeHist(cv2.cvtColor(maskedImg, cv2.COLOR_BGR2GRAY))
 
 # Create bounding rectangle:
