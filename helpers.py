@@ -1,5 +1,6 @@
 import cv2
 import datetime
+import imutils
 import math
 from matplotlib import pyplot as plt
 import numpy as np
@@ -21,6 +22,24 @@ def import_image(file_name):
     threshold_image = cv2.threshold(blurred_image, 25, 255, cv2.THRESH_BINARY)[1]
 
     return img, grey_image, blurred_image, threshold_image
+
+
+def detect_reverb(thresholded_image):
+    """Detect reverb feature in ultrasound image"""
+    # find contours in the thresholded image
+    cnts = cv2.findContours(thresholded_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if imutils.is_cv2() else cnts[1]  # OpenCV 2.4 returns a 2-tuple, OpenCV 3 returns a 3-tuple
+    # From the features returned from the image select the reverb pattern
+    cnt = select_contour(cnts)
+    # Calculate convex of selected contour:
+    convex = cv2.convexHull(cnt)
+    # Find the four corners of an ultrasound arc:
+    corners = corners_of_arc(convex)
+    # bottom_left, bottom_right, top_left, top_right = cornersOfArc(convex)
+    # Detect the ultrasound scan from image:
+    ultrasound_cnt, cnt, convex = clean_data(cnt, convex)
+    # cv2.drawContours(img, [ultrasound_cnt], -1, (0, 0, 255), 2)
+    return
 
 def create_output_directory(directory):
     """Create directory to contain results"""
