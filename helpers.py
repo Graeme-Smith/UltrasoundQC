@@ -233,8 +233,8 @@ plt.gca().invert_yaxis()
 
 def pixel_intensities(image_array):
     """For a greyscale image/numpy array returns the average pixel intensity across each column and row."""
-    horizontal_intensity = np.mean(image_array, axis=0)  # Average by column
-    vertical_intensity = np.mean(image_array, axis=1)  # Average by row
+    horizontal_intensity = np.mean(image_array, axis=1)  # Average by column
+    vertical_intensity = np.mean(image_array, axis=0)  # Average by row
     return horizontal_intensity, vertical_intensity
 
 

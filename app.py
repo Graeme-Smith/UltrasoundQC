@@ -81,7 +81,7 @@ def display_content(open_tab, file_name):
         ultrasound_cnt, cnt, convex, corners = detect_reverb(threshold_image)
         # Return cropped image
         crop_img = mask_background(img, ultrasound_cnt)
-        dst = crop_img  # TODO remove when code below completed
+        dst = curvilinear_to_linear(grey_image)
 
     # Selected Image Tab
     if open_tab == 1:
@@ -121,7 +121,7 @@ def display_content(open_tab, file_name):
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
 
             fig = plt.figure()
-            plt.imshow(curvilinear_to_linear(grey_image), aspect='equal', extent=None)
+            plt.imshow(dst, aspect='equal', extent=None)
 
             imgdata = io.StringIO()
             fig.savefig(imgdata, format='png', bbox_inches='tight')
@@ -150,7 +150,27 @@ def display_content(open_tab, file_name):
                          ),
                 html.Div(
                     [
-                        dcc.Graph(id='horizontal_intensity')
+                        dcc.Graph(
+                            id='horizontal_intensity',
+                            figure={
+                                'data': [
+                                    go.Scatter(
+                                        x=range(0, len(horizontal_intensity), 1),
+                                        y=horizontal_intensity,
+                                        mode='lines',
+                                        name='lines'
+                                    )
+                                ],
+                                'layout': go.Layout(
+                                    xaxis=dict(
+                                        domain=[0, 0.45]
+                                    ),
+                                    yaxis=dict(
+                                        domain=[0, 0.45]
+                                    )
+                                )
+                            }
+                        )
                     ],
                     className='four columns',
                     style={'margin-top': '0'}
@@ -160,9 +180,31 @@ def display_content(open_tab, file_name):
         html.Div(
             [
                 html.Div(
+
                     [
-                        dcc.Graph(id='vertical_intensity')
+                        dcc.Graph(
+                            id='vertical_intensity',
+                            figure={
+                                'data': [
+                                    go.Scatter(
+                                        x=range(0, len(vertical_intensity), 1),
+                                        y=vertical_intensity,
+                                        mode='lines',
+                                        name='lines'
+                                    )
+                                ],
+                                'layout': go.Layout(
+                                    xaxis=dict(
+                                        domain=[0, 0.45]
+                                    ),
+                                    yaxis=dict(
+                                        domain=[0, 0.45]
+                                    )
+                                )
+                            }
+                        )
                     ],
+
                     className='eight columns',
                     style={'margin-top': '0'}
                 )
