@@ -17,8 +17,7 @@ from helpers import *
 import StringIO as io
 
 
-# Import selected files. TODO Remove hard coded reference to im
-# port directory.
+# Import selected files. TODO Remove hard coded reference to image directory.
 image_path = "/home/graeme/PycharmProjects/UltrasoundQC/test_data/"
 image_files = import_batch_images(image_path)
 user_selected_file = None
@@ -82,6 +81,7 @@ def display_content(open_tab, file_name):
         ultrasound_cnt, cnt, convex, corners = detect_reverb(threshold_image)
         # Return cropped image
         crop_img = mask_background(img, ultrasound_cnt)
+        dst = crop_img  # TODO remove when code below completed
 
     # Selected Image Tab
     if open_tab == 1:
@@ -109,8 +109,7 @@ def display_content(open_tab, file_name):
             pass
         else:
             # Calculate column and row intensities for numpy array:
-            horizontal_intensity = np.mean(crop_img, axis=0)  # Average by column
-            vertical_intensity = np.mean(crop_img, axis=1)  # Average by row
+            horizontal_intensity, vertical_intensity = pixel_intensities(dst)
 
             fig = plt.figure()
             plt.imshow(crop_img, aspect='equal', extent=None)
@@ -120,6 +119,16 @@ def display_content(open_tab, file_name):
 
             encoded_image = base64.b64encode(imgdata.getvalue())
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
+
+            fig = plt.figure()
+            plt.imshow(curvilinear_to_linear(grey_image), aspect='equal', extent=None)
+
+            imgdata = io.StringIO()
+            fig.savefig(imgdata, format='png', bbox_inches='tight')
+
+            encoded_image = base64.b64encode(imgdata.getvalue())
+            transformed_image = 'data:image/png;base64,{}'.format(encoded_image)
+
             return  html.Div(
         [
 
@@ -135,7 +144,7 @@ def display_content(open_tab, file_name):
         html.Div(
             [
                 html.Img(id='transformed_image',
-                         src=selected_image,
+                         src=transformed_image,
                          className='eight columns',
                          style={'margin-top': '0'}
                          ),
