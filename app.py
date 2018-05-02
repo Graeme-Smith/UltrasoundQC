@@ -29,8 +29,8 @@ app.css.config.serve_locally = True
 app.config['suppress_callback_exceptions']=True
 
 colors = {
-    'background': '#111111',
-    'text': '#ffffff'
+    'background': '#ffffff',
+    'text': '#111111'
 }
 
 app.layout = html.Div(style={'backgroundColor': colors['background']},
@@ -97,7 +97,11 @@ def display_content(open_tab, file_name):
 
             encoded_image = base64.b64encode(imgdata.getvalue())
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
-            return html.Img(id='loaded_image', src=selected_image)
+            return html.Div(
+                [
+                    html.Img(id='loaded_image', src=selected_image)
+                ]
+            )
 
     # Image Analysis Tab
     if open_tab == 2:
@@ -116,7 +120,47 @@ def display_content(open_tab, file_name):
 
             encoded_image = base64.b64encode(imgdata.getvalue())
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
-            return html.Img(id='loaded_image', src=selected_image)
+            return  html.Div(
+        [
+
+        html.Div(
+        [
+            html.Img(id='cropped_image',
+                     src=selected_image,
+                className='eight columns',
+                style={'margin-top': '0'}
+            )
+        ],
+        className='row'),
+        html.Div(
+            [
+                html.Img(id='transformed_image',
+                         src=selected_image,
+                         className='eight columns',
+                         style={'margin-top': '0'}
+                         ),
+                html.Div(
+                    [
+                        dcc.Graph(id='horizontal_intensity')
+                    ],
+                    className='four columns',
+                    style={'margin-top': '0'}
+                )
+            ],
+            className='row'),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        dcc.Graph(id='vertical_intensity')
+                    ],
+                    className='eight columns',
+                    style={'margin-top': '0'}
+                )
+            ],
+            className='row')
+                    ]
+            )
 
 
     # 3d Intensity Tab
