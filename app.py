@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # Required as matplotlib must be run from main thread
 from matplotlib import pyplot as plt
 
 import base64  # pybase64 required to serve static files to dash server.
@@ -15,7 +15,7 @@ import plotly.graph_objs as go
 import plotly.tools as tls
 from helpers import *
 import StringIO as io
-import visdom
+
 
 # Import selected files. TODO Remove hard coded reference to im
 # port directory.
@@ -88,9 +88,17 @@ def display_content(open_tab, file_name):
         if file_name is None:
             pass
         else:
-            encoded_image = base64.b64encode(open(file_name, 'rb').read())
+            fig = plt.figure()
+            temp_img = cv2.drawContours(img, [cnt], 0, (0, 255, 0), 3)
+            plt.imshow(temp_img)
+
+            imgdata = io.StringIO()
+            fig.savefig(imgdata, format='png')
+
+            encoded_image = base64.b64encode(imgdata.getvalue())
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
             return html.Img(id='loaded_image', src=selected_image)
+
     # Image Analysis Tab
     if open_tab == 2:
         if file_name is None:
@@ -117,7 +125,7 @@ def display_content(open_tab, file_name):
             pass
         else:
             # Plot 3d surface of ultrasound reverb
-            crop_img[crop_img == 0] = 1
+            crop_img[crop_img == 0] = 1 # TODO WTF?
             return html.Div([
             dcc.Graph(
                 id='Ultrasound-Reverb-3d-Plot',
