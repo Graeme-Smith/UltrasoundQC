@@ -93,7 +93,7 @@ def display_content(open_tab, file_name):
             plt.imshow(temp_img)
 
             imgdata = io.StringIO()
-            fig.savefig(imgdata, format='png')
+            fig.savefig(imgdata, format='png', bbox_inches='tight')
 
             encoded_image = base64.b64encode(imgdata.getvalue())
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
@@ -113,10 +113,10 @@ def display_content(open_tab, file_name):
             vertical_intensity = np.mean(crop_img, axis=1)  # Average by row
 
             fig = plt.figure()
-            plt.imshow(crop_img)
+            plt.imshow(crop_img, aspect='equal', extent=None)
 
             imgdata = io.StringIO()
-            fig.savefig(imgdata, format='png')
+            fig.savefig(imgdata, format='png', bbox_inches='tight')
 
             encoded_image = base64.b64encode(imgdata.getvalue())
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
