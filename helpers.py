@@ -248,3 +248,18 @@ def plot3d(greyscale_image, log_transform=False):
         # Log transform data before plotting
         print "todo"
     pass
+
+
+def curvilinear_to_linear(c_image):  # TODO Rewrite hacky code
+    """Convert curvilinear data to linear data to aid analysis"""
+    color = [0]  # black border
+    # border widths; I set them all to 150
+    top, bottom, left, right = [0, 2000, 0, 2000]
+    img_with_border = cv2.copyMakeBorder(c_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
+    dst = cv2.logPolar(img_with_border, (392.72189105, -307.7655977), 400, cv2.WARP_FILL_OUTLIERS)
+    # toimage(dst).show()
+    rows, cols = dst.shape
+    M = cv2.getRotationMatrix2D((cols / 2, rows / 2), 90, 1)
+    dst = cv2.warpAffine(dst, M, (cols, rows))
+    dst = dst[353:468, 553:980]
+    return dst
