@@ -56,20 +56,7 @@ img, grey_image, blurred_image, threshold_image = import_image(image_files[1])
 '''Detect reverb feature in image'''
 ultrasound_cnt, cnt, convex, corners = detect_reverb(threshold_image)
 
-# Create the basic black image
-mask = np.zeros(img.shape, np.uint8)
-# Draw a white contour
-cv2.drawContours(mask, [cnt], 0, (255, 255, 255), -1)
-
-# Apply the mask and display the result
-maskedImg = cv2.bitwise_and(img, mask)
-# TODO Check that equalizeHist is appropriate here:
-equalised_img = cv2.equalizeHist(cv2.cvtColor(maskedImg, cv2.COLOR_BGR2GRAY))
-
-# Create bounding rectangle:
-x, y, w, h = cv2.boundingRect(ultrasound_cnt)
-# cv2.rectangle(equalised_img,(x,y),(x+w,y+h),250,2)
-crop_img = equalised_img[y:y + h, x:x + w]
+crop_img = mask_background(img, ultrasound_cnt)
 
 # Calculate column and row intensities for numpy array:
 horizontal_intensity = np.mean(crop_img, axis=0)  # Average by column
@@ -92,6 +79,16 @@ horiz_trace = go.Scatter(
 
 int_data = [horiz_trace]
 layout = go.Layout(
+    images=[dict(
+            source="https://images.plot.ly/language-icons/api-home/python-logo.png",
+            xref="x",
+            yref="y",
+            x=100,
+            y=60,
+            sizex=100,
+            sizey=100,
+            opacity=1,
+            layer="below")],
     xaxis=dict(
         domain=[0, 0.45]
     ),
@@ -99,7 +96,8 @@ layout = go.Layout(
         domain=[0, 0.45]
     )
 )
-py.plot(int_data, filename='horizontal.html')
+fig=go.Figure(data=int_data,layout=layout)
+py.plot(fig, filename='horizontal.html')
 
 # Plot vertical pixel intensity.
 vert_trace = go.Scatter(
@@ -201,6 +199,7 @@ horiz_trace = go.Scatter(
 )
 
 int_data = [horiz_trace]
+
 layout = go.Layout(
     xaxis=dict(
         domain=[0, 0.45]

@@ -39,7 +39,26 @@ def detect_reverb(thresholded_image):
     # Detect the ultrasound scan from image:
     ultrasound_cnt, cnt, convex = clean_data(cnt, convex)
     # cv2.drawContours(img, [ultrasound_cnt], -1, (0, 0, 255), 2)
-    return
+    return ultrasound_cnt, cnt, convex, corners
+
+def mask_background(image, ultrasound_contour):
+    """Mask out background and return image cropped to ROI"""
+    # Create a basic black image with same dimensions as image
+    mask = np.zeros(image.shape, np.uint8)
+    # Draw a white contour
+    cv2.drawContours(mask, [ultrasound_contour], 0, (255, 255, 255), -1)
+
+    # Apply the mask and display the result
+    masked_img = cv2.bitwise_and(image, mask)
+    # TODO Check that equalizeHist is appropriate here:
+    equalised_img = cv2.equalizeHist(cv2.cvtColor(masked_img, cv2.COLOR_BGR2GRAY))
+
+    # Create bounding rectangle:
+    x, y, w, h = cv2.boundingRect(ultrasound_contour)
+    # cv2.rectangle(equalised_img,(x,y),(x+w,y+h),250,2)
+    crop_img = equalised_img[y:y + h, x:x + w]
+    return crop_img
+
 
 def create_output_directory(directory):
     """Create directory to contain results"""
@@ -75,7 +94,7 @@ def select_contour(contours):
     """Select the contour relating to the ultasound image."""
     if len(contours) != 0:
         # Order contours by largest area:
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)[0:6]  # Return 5 largest features
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[0:3]  # Return 3 largest features
         # Read in template contour to use as comparison:
         template_contour = np.load("contour_template" + '.npy')
         hu_invariant = []
