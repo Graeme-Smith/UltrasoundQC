@@ -110,9 +110,10 @@ def display_content(open_tab, file_name):
         else:
             # Calculate column and row intensities for numpy array:
             horizontal_intensity, vertical_intensity = pixel_intensities(dst)
-
+            img_width, img_height = crop_img.shape
             fig = plt.figure()
             plt.imshow(crop_img, aspect='equal', extent=None)
+            plt.axis('off')
 
             imgdata = io.StringIO()
             fig.savefig(imgdata, format='png', bbox_inches='tight')
@@ -122,6 +123,7 @@ def display_content(open_tab, file_name):
 
             fig = plt.figure()
             plt.imshow(dst, aspect='equal', extent=None)
+            plt.axis('off')
 
             imgdata = io.StringIO()
             fig.savefig(imgdata, format='png', bbox_inches='tight')
@@ -155,8 +157,8 @@ def display_content(open_tab, file_name):
                             figure={
                                 'data': [
                                     go.Scatter(
-                                        x=range(0, len(horizontal_intensity), 1),
-                                        y=horizontal_intensity,
+                                        x=horizontal_intensity,
+                                        y=range(0, len(horizontal_intensity), 1),
                                         mode='lines',
                                         name='lines'
                                     )
@@ -166,7 +168,17 @@ def display_content(open_tab, file_name):
                                         domain=[0, 0.45]
                                     ),
                                     yaxis=dict(
-                                        domain=[0, 0.45]
+                                        domain=[0, 0.45],
+                                        autorange='reversed'
+                                    ),
+                                    autosize=False,
+                                    width=1000,
+                                    height=1500,
+                                    margin=dict(
+                                        l=65,
+                                        r=50,
+                                        b=65,
+                                        t=90
                                     )
                                 )
                             }
@@ -199,7 +211,16 @@ def display_content(open_tab, file_name):
                                     ),
                                     yaxis=dict(
                                         domain=[0, 0.45]
-                                    )
+                                    ),
+                                    autosize=False,
+                                    width=1500,
+                                    height=500,
+                                    margin=dict(
+                                        l=0,
+                                        r=0,
+                                        b=0,
+                                        t=0
+                                    ),
                                 )
                             }
                         )
@@ -248,4 +269,4 @@ def display_content(open_tab, file_name):
 
 if __name__ == '__main__':
     app.run_server(debug=True,
-                   port=8045)
+                   port=8047)
