@@ -110,10 +110,11 @@ def display_content(open_tab, file_name):
         else:
             # Calculate column and row intensities for numpy array:
             horizontal_intensity, vertical_intensity = pixel_intensities(dst)
-            img_width, img_height = crop_img.shape
+
             fig = plt.figure()
             plt.imshow(crop_img, aspect='equal', extent=None)
             plt.axis('off')
+            plt.close()
 
             imgdata = io.StringIO()
             fig.savefig(imgdata, format='png', bbox_inches='tight')
@@ -122,17 +123,114 @@ def display_content(open_tab, file_name):
             selected_image = 'data:image/png;base64,{}'.format(encoded_image)
 
             fig = plt.figure()
-            plt.imshow(dst, aspect='equal', extent=None)
-            plt.axis('off')
+            plt.imshow(dst)
+            #plt.axis('off')
+            #fig.axes.get_xaxis().set_visible(False)
+            #fig.axes.get_yaxis().set_visible(False)
+
+            simgdata = io.StringIO()
+            #sim = Image.fromarray(dst)
+            sim = Image.fromarray(np.uint8(plt.cm.viridis(dst) * 255))
+            sim.save(simgdata, format="PNG")
+            #sim.save("test.png", format="PNG")
+
+            encoded_image = base64.b64encode(simgdata.getvalue())
+            #simgdata.close()
 
             imgdata = io.StringIO()
-            fig.savefig(imgdata, format='png', bbox_inches='tight')
+            #fig.savefig(imgdata)
+            ax = fig.gca()
+            ax.set_axis_off()
+            ax.autoscale(False)
+            extent = ax.get_window_extent().transformed(plt.gcf().dpi_scale_trans.inverted())
+            fig.savefig(imgdata,  bbox_inches=extent)
+            plt.close()
 
-            encoded_image = base64.b64encode(imgdata.getvalue())
+
+            #encoded_image = base64.b64encode(imgdata.getvalue())
             transformed_image = 'data:image/png;base64,{}'.format(encoded_image)
+            img_height, img_width = dst.shape
+
+            trace0 = go.Scatter(
+                x=[1, 2, 3],
+                y=[2, 3, 4]
+            )
+            trace1 = go.Scatter(
+                x=[20, 30, 40],
+                y=[5, 5, 5],
+            )
+            trace2 = go.Scatter(
+                x=[2, 3, 4],
+                y=[600, 700, 800],
+            )
+            trace3 = go.Scatter()
+
+            fig = tls.make_subplots(rows=2, cols=2, shared_yaxes=True, shared_xaxes=True)
+            tls.make_subplots()
+            fig.append_trace(trace0, 1, 1)
+            fig.append_trace(trace1, 1, 2)
+            fig.append_trace(trace2, 2, 1)
+
+            fig['layout'].update(height=600, width=1200,
+                                 title='Intensity Plots')
 
             return  html.Div(
         [
+             html.Div([
+                dcc.Graph(figure=fig, id='my-figure')
+            ]),
+
+            html.Div(
+                [
+                    dcc.Graph(
+                        id='transformed_image_plot',
+                        figure={
+                            'data': [
+                                go.Scatter()
+                            ],
+                            'layout': go.Layout(
+                                images=[dict(
+                                    source=transformed_image,
+                                    xref="x",
+                                    xanchor="left",
+                                    yref="y",
+                                    yanchor="top",
+                                    x=0,
+                                    y=0,
+                                    sizex=img_width,
+                                    sizey=img_height,
+                                    sizing="fill",
+                                    opacity=1,
+                                    layer="below")],
+                                xaxis=dict(
+                                    domain=[0, 1],
+                                    range=[0, img_width],
+                                    tickmode="linear",
+                                    tick0=0,
+                                    dtick=100
+                                ),
+                                yaxis=dict(
+                                    domain=[0, 1],
+                                    autorange='reversed',
+                                    range=[img_height, 0],
+                                    tickmode="linear",
+                                    tick0=0,
+                                    dtick=100
+                                ),
+                                autosize=True,
+                                width=img_width*2,
+                                height=img_height*2,
+                                margin=dict(
+                                    l=20,
+                                    r=0,
+                                    b=20,
+                                    t=0
+                                )
+                            )
+                        }
+                    )
+                ],
+        className='row'),
 
         html.Div(
         [
@@ -269,4 +367,4 @@ def display_content(open_tab, file_name):
 
 if __name__ == '__main__':
     app.run_server(debug=True,
-                   port=8047)
+                   port=8059)
