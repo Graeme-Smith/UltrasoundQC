@@ -151,7 +151,11 @@ def display_content(open_tab, file_name):
             transformed_image = 'data:image/png;base64,{}'.format(encoded_image)
             img_height, img_width = dst.shape
 
-            trace0 = go.Scatter()
+            trace0 = go.Scatter(
+                name='Transformed Image',
+                xaxis='x1',
+                yaxis='y1'
+            )
             trace1 = go.Scatter(
                     x=horizontal_intensity,
                     y=range(0, len(horizontal_intensity), 1),
@@ -186,12 +190,33 @@ def display_content(open_tab, file_name):
                                      yref="y",
                                      yanchor="top",
                                      x=0,
-                                     y=img_height,
+                                     y=0,
                                      sizex=img_width,
                                      sizey=img_height,
-                                     sizing="fill",
+                                     # TODO contain instead of stretch?
+                                     sizing="stretch",
                                      opacity=1,
-                                     layer="below")]
+                                     layer="below")],
+                                 xaxis=dict(
+                                     domain=[0, 0.8]
+                                 ),
+                                 xaxis2=dict(
+                                     domain=[0.8, 1]
+                                 ),
+                                 xaxis3=dict(
+                                     domain=[0, 0.8]
+                                 ),
+                                 yaxis1=dict(
+                                         autorange='reversed',
+                                         range=[0, img_height],
+                                     domain=[0.51, 1]
+                                     ),
+                                 yaxis2=dict(
+                                     domain=[0, 0.49]
+                                 ),
+                                 yaxis3=dict(
+                                     domain=[0.51, 1]
+                                 )
                                  )
 
             return html.Div(
@@ -199,58 +224,6 @@ def display_content(open_tab, file_name):
              html.Div([
                 dcc.Graph(figure=fig, id='my-figure')
             ]),
-
-            html.Div(
-                [
-                    dcc.Graph(
-                        id='transformed_image_plot',
-                        figure={
-                            'data': [
-                                go.Scatter()
-                            ],
-                            'layout': go.Layout(
-                                images=[dict(
-                                    source=transformed_image,
-                                    xref="x",
-                                    xanchor="left",
-                                    yref="y",
-                                    yanchor="top",
-                                    x=0,
-                                    y=0,
-                                    sizex=img_width,
-                                    sizey=img_height,
-                                    sizing="fill",
-                                    opacity=1,
-                                    layer="below")],
-                                xaxis=dict(
-                                    domain=[0, 1],
-                                    range=[0, img_width],
-                                    tickmode="linear",
-                                    tick0=0,
-                                    dtick=100
-                                ),
-                                yaxis=dict(
-                                    domain=[0, 1],
-                                    autorange='reversed',
-                                    range=[img_height, 0],
-                                    tickmode="linear",
-                                    tick0=0,
-                                    dtick=100
-                                ),
-                                autosize=True,
-                                width=img_width*2,
-                                height=img_height*2,
-                                margin=dict(
-                                    l=20,
-                                    r=0,
-                                    b=20,
-                                    t=0
-                                )
-                            )
-                        }
-                    )
-                ],
-        className='row'),
 
         html.Div(
         [
@@ -260,95 +233,7 @@ def display_content(open_tab, file_name):
                 style={'margin-top': '0'}
             )
         ],
-        className='row'),
-        html.Div(
-            [
-                html.Img(id='transformed_image',
-                         src=transformed_image,
-                         className='eight columns',
-                         style={'margin-top': '0'}
-                         ),
-                html.Div(
-                    [
-                        dcc.Graph(
-                            id='horizontal_intensity',
-                            figure={
-                                'data': [
-                                    go.Scatter(
-                                        x=horizontal_intensity,
-                                        y=range(0, len(horizontal_intensity), 1),
-                                        mode='lines',
-                                        name='lines'
-                                    )
-                                ],
-                                'layout': go.Layout(
-                                    xaxis=dict(
-                                        domain=[0, 0.45]
-                                    ),
-                                    yaxis=dict(
-                                        domain=[0, 0.45],
-                                        autorange='reversed'
-                                    ),
-                                    autosize=False,
-                                    width=1000,
-                                    height=1500,
-                                    margin=dict(
-                                        l=65,
-                                        r=50,
-                                        b=65,
-                                        t=90
-                                    )
-                                )
-                            }
-                        )
-                    ],
-                    className='four columns',
-                    style={'margin-top': '0'}
-                )
-            ],
-            className='row'),
-        html.Div(
-            [
-                html.Div(
-
-                    [
-                        dcc.Graph(
-                            id='vertical_intensity',
-                            figure={
-                                'data': [
-                                    go.Scatter(
-                                        x=range(0, len(vertical_intensity), 1),
-                                        y=vertical_intensity,
-                                        mode='lines',
-                                        name='lines'
-                                    )
-                                ],
-                                'layout': go.Layout(
-                                    xaxis=dict(
-                                        domain=[0, 0.45]
-                                    ),
-                                    yaxis=dict(
-                                        domain=[0, 0.45]
-                                    ),
-                                    autosize=False,
-                                    width=1500,
-                                    height=500,
-                                    margin=dict(
-                                        l=0,
-                                        r=0,
-                                        b=0,
-                                        t=0
-                                    ),
-                                )
-                            }
-                        )
-                    ],
-
-                    className='eight columns',
-                    style={'margin-top': '0'}
-                )
-            ],
-            className='row')
+        className='row')
                     ]
             )
 
