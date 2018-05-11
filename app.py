@@ -151,19 +151,25 @@ def display_content(open_tab, file_name):
             transformed_image = 'data:image/png;base64,{}'.format(encoded_image)
             img_height, img_width = dst.shape
 
-            trace0 = go.Scatter(
-                x=[1, 2, 3],
-                y=[2, 3, 4]
-            )
+            trace0 = go.Scatter()
             trace1 = go.Scatter(
-                x=[20, 30, 40],
-                y=[5, 5, 5],
+                    x=horizontal_intensity,
+                    y=range(0, len(horizontal_intensity), 1),
+                    mode='lines',
+                    name='Horizontal Intensity',
+                    xaxis='x2',
+                    yaxis='y2'
             )
             trace2 = go.Scatter(
-                x=[2, 3, 4],
-                y=[600, 700, 800],
+                    x=range(0, len(vertical_intensity), 1),
+                    y=vertical_intensity,
+                    mode='lines',
+                    name='Vertical Intensity',
+                    xaxis='x3',
+                    yaxis='y3'
             )
-            trace3 = go.Scatter()
+
+            # Assemble subplots into one figure:
 
             fig = tls.make_subplots(rows=2, cols=2, shared_yaxes=True, shared_xaxes=True)
             tls.make_subplots()
@@ -172,9 +178,23 @@ def display_content(open_tab, file_name):
             fig.append_trace(trace2, 2, 1)
 
             fig['layout'].update(height=600, width=1200,
-                                 title='Intensity Plots')
+                                 title='Intensity Plots',
+                                 images=[dict(
+                                     source=transformed_image,
+                                     xref="x",
+                                     xanchor="left",
+                                     yref="y",
+                                     yanchor="top",
+                                     x=0,
+                                     y=img_height,
+                                     sizex=img_width,
+                                     sizey=img_height,
+                                     sizing="fill",
+                                     opacity=1,
+                                     layer="below")]
+                                 )
 
-            return  html.Div(
+            return html.Div(
         [
              html.Div([
                 dcc.Graph(figure=fig, id='my-figure')
