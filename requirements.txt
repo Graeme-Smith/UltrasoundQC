@@ -17,7 +17,7 @@ matplotlib==2.2.2
 nbformat==4.4.0
 networkx==2.1
 numpy==1.14.2
-opencv-contrib-python==3.4.0.12
+opencv-contrib-python==4.2.0.32
 opencv-python==3.4.0.12
 Pillow==5.0.0
 plotly==2.5.1
